@@ -1,0 +1,32 @@
+<head>
+  <title>ecolor</title>
+</head>
+
+<body>
+
+  {{> hello}}
+  {{> experimentDiv}}
+  {{> visualizations}}
+
+</body>
+
+<template name="hello">
+  <h1>Analyze the bacteria!</h1>
+  {{greeting}}
+  <input type="button" value="createExperiment"/>
+</template>
+
+<template name="experimentDiv">
+  {{#each experiments}}
+    <div>
+      <h1>{{_id}}</h1>
+    </div>
+  {{/each}}
+</template>
+
+<template name="visualizations">
+  <div id="viz">
+    <h1>Visualizations</h1>
+  </div>
+</template>
+
