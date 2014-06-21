@@ -7,3 +7,5 @@ standard-app-packages
 autopublish
 insecure
 d3
+server-eval
+http-methods
