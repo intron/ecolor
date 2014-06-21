@@ -8,7 +8,7 @@ HTTP.methods({
     var dishBarcode = this.requestHeaders.barcode;
     var colonyData = JSON.parse(data);
     console.log('colonyData: ' + JSON.stringify(colonyData[0]));
-    Experiments.insert({dishBarcode: dishBarcode, colonyData: colonyData});
+    Experiments.upsert({dishBarcode: dishBarcode}, {$set: {dishBarcode: dishBarcode, colonyData: colonyData}});
   },
   'uploadDishImage': function(data) {
     console.log('/uploadDishImage contacted');
@@ -28,7 +28,7 @@ HTTP.methods({
       fs.writeFileSync(filepath, data);
       //assume the colony data is uploaded before image
       //just store filename for now
-      Experiments.update({dishBarcode: dishBarcode}, {$set: {dishImageFilename: filepath}});
+      Experiments.upsert({dishBarcode: dishBarcode}, {$set: {dishBarcode: dishBarcode, dishImageFilename: filepath}});
       return 'Yo Dawg!';
     }
   }
