@@ -30,7 +30,7 @@ if (Meteor.isClient) {
   Template.visualizations.rendered = function() {
     var query = { scanTime: { $gt: clientStartTime}, rgb: { $exists: true} };
     var svg = d3.select("#viz").append("svg")
-      .attr("width", hishtWidth)
+      .attr("width", histWidth)
       .attr("height", 400);
 
     Deps.autorun(function () {
