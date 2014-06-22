@@ -7,7 +7,13 @@ HTTP.methods({
     //TODO what sort of validation?
     var dishBarcode = this.requestHeaders.barcode;
     var colonyData = JSON.parse(data);
-    console.log('colonyData: ' + JSON.stringify(colonyData[0]));
+    var count = 0;
+    colonyData.forEach(function(colony) {
+      count = count+1;
+      colony.dishBarcode = dishBarcode;
+      Colonies.insert(colony);
+    });
+    console.log('added colonies: ' + count);
     Experiments.upsert({dishBarcode: dishBarcode}, {$set: {dishBarcode: dishBarcode, colonyData: colonyData}});
   },
   'uploadDishImage': function(data) {
