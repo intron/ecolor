@@ -49,31 +49,35 @@ if (Meteor.isClient) {
 
 
   Template.visualizations.rendered = function() {
+    // use if we only want recently-added records
     // var query = { scanTime: { $gt: clientStartTime}, rgb: { $exists: true} };
+
     var chart = d3.select("#viz")
+    var maxWidth = 600;
 
     Deps.autorun(function () {
       chart.selectAll("div")
-        .data(Experiments.findOne().fetch().colonyData)
+        .data(Colonies.find().fetch())
         .enter()
         .append("div")
         // .style("width", function(d, i) { return d3.rgb(d.rgb[0], d.rgb[1], d.rgb[2])})
-        .style("background-color", function(d, i) { return hueToColor(d.Hue)})
-        .style("width", function (d, i) { return calculateWidth(d) })
+        .style("background-color", hslaify})
+        .style("width", function (d) { return scalify(d.area) + "px"; })
         .style("height", 20)
-        .text(function(d, i) { return i });
+        .text(function(d, i) { return i; });
     });
   };
 
+////////////
 // HELPERS
+////////////
+  var scalify = d3.scale.linear()
+    .domain([0, d3.max(d.area)])
+    .range([0, maxWidth]);
 
-  function hueToColor(hue) {
-    return "hsla(" + hue + ",100%,50%,1)";  
-  }
-
-  function calculateWidth(d) {
-    console.log(d);
-    return (d.Saturation / 10) + "px";  
+  // creates hsla style string from colony record
+  function hslaify(d) {
+    return "hsla(" + d.Hue + "," + d.Saturation + "%,50%,1)";  
   }
 
 }
