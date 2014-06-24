@@ -1,6 +1,8 @@
 if (Meteor.isClient) {
   var clientStartTime = Date.now();
 
+
+
   Template.hello.greeting = function () {
     return "Welcome to ecolor.";
   };
@@ -24,7 +26,6 @@ if (Meteor.isClient) {
     return cursor;
   };
   
-  var histWidth = 1000;
 
 /*
   Template.visualizations.rendered = function() {
@@ -47,13 +48,15 @@ if (Meteor.isClient) {
 */
 
 
+/*
+
+scaling bars by area
 
   Template.visualizations.rendered = function() {
     // use if we only want recently-added records
     // var query = { scanTime: { $gt: clientStartTime}, rgb: { $exists: true} };
 
     var chart = d3.select("#viz")
-    var maxWidth = 600;
 
     Deps.autorun(function () {
       chart.selectAll("div")
@@ -61,19 +64,52 @@ if (Meteor.isClient) {
         .enter()
         .append("div")
         // .style("width", function(d, i) { return d3.rgb(d.rgb[0], d.rgb[1], d.rgb[2])})
-        .style("background-color", hslaify})
-        .style("width", function (d) { return scalify(d.area) + "px"; })
-        .style("height", 20)
-        .text(function(d, i) { return i; });
+        .style("background-color", hslaify)
+        .style("height", function() { return "4px" })
+        .style("width", function (d) { 
+          console.log(d.Area);
+          return d.Area + "px";
+          })
+    });
+  };
+
+  */
+
+  Template.visualizations.rendered = function() {
+    // use if we only want recently-added records
+    // var query = { scanTime: { $gt: clientStartTime}, rgb: { $exists: true} };
+
+    var chart = d3.select("#viz")
+
+    Deps.autorun(function () {
+      var coloniesData = Colonies.find().fetch();
+      var bins = Array.apply(null, new Array(255)).map(Number.prototype.valueOf,0);
+
+      coloniesData.forEach(function(colony) { 
+        bins[colony.Hue]++
+      });
+
+      console.log(bins);
+
+      chart.selectAll("div")
+        .remove();
+
+      chart.selectAll("div")
+        .data(bins)
+        .enter()
+        .append("div")
+        .style("background-color", function(d, i) { 
+          return hslaify({ Hue: i, Saturation: 100});})
+        .style("width", function (d, i) { 
+          console.log( d + " " + i); 
+          return d + "px";})
+        .style("height", function() { return "4px" })
     });
   };
 
 ////////////
 // HELPERS
 ////////////
-  var scalify = d3.scale.linear()
-    .domain([0, d3.max(d.area)])
-    .range([0, maxWidth]);
 
   // creates hsla style string from colony record
   function hslaify(d) {

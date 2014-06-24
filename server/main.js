@@ -4,18 +4,27 @@ var cursor = Experiments.find({ scanTime: { $gt: Date.now()}});
 HTTP.methods({
   'uploadColonyData': function(data) {
     console.log('/uploadColonyData contacted');
-    //TODO what sort of validation?
     var dishBarcode = this.requestHeaders.barcode;
+    
+    //quit if we already have colonies with this dish's barcode in the db
+    if(Colonies.findOne({dishBarcode: dishBarcode})) {
+     var msg = 'This dish was already scanned into the database.  Quitting.';
+     console.log(msg);
+     //TODO post response
+     return;
+    }
+
     var colonyData = JSON.parse(data);
     var count = 0;
     colonyData.forEach(function(colony) {
-      count = count+1;
       colony.dishBarcode = dishBarcode;
       Colonies.insert(colony);
+      count++;
     });
     console.log('added colonies: ' + count);
     Experiments.upsert({dishBarcode: dishBarcode}, {$set: {dishBarcode: dishBarcode, colonyData: colonyData}});
   },
+
   'uploadDishImage': function(data) {
     console.log('/uploadDishImage contacted');
     console.log(this.requestHeaders);
