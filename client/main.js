@@ -1,12 +1,11 @@
 if (Meteor.isClient) {
-  var clientStartTime = Date.now();
 
+  // useless greeting string
   Template.hello.greeting = function () {
-    return "Welcome to ecolor.";
+    return "ecolor (main display)";
   };
 
   Template.hello.events({
-    
     // test button creates a record in Experiments
     'click input': function () {
       var guid = Experiments.insert({ "dishID": "123abc",
@@ -18,10 +17,9 @@ if (Meteor.isClient) {
     }
   });
 
-  // retrieve records in Experiments created after this session started
+  // retrieve all records in Experiments
   Template.experimentDiv.experiments = function () {
-    var cursor = Experiments.find({ scanTime: { $gt: clientStartTime} });
-    return cursor;
+    return Experiments.find();
   };
 
   Template.visualizations.rendered = function() {
@@ -64,56 +62,3 @@ if (Meteor.isClient) {
   }
 
 }
-
-
-
-  
-
-/*
-  Template.visualizations.rendered = function() {
-    var query = { scanTime: { $gt: clientStartTime}, rgb: { $exists: true} };
-    var svg = d3.select("#viz").append("svg")
-      .attr("width", histWidth)
-      .attr("height", 400);
-
-    Deps.autorun(function () {
-      svg.selectAll("circle")
-        .data(Experiments.find(query).fetch())
-        .enter()
-        .append("rect")
-        .style("fill", function(d, i) { return d3.rgb(d.rgb[0], d.rgb[1], d.rgb[2])})
-        .attr("r", 50)
-        .attr("cx", function (d, i) { return d.rgb[0]})
-        .attr("cy", function (d, i) { return d.rgb[1]})
-    });
-  };
-*/
-
-
-/*
-
-scaling bars by area
-
-  Template.visualizations.rendered = function() {
-    // use if we only want recently-added records
-    // var query = { scanTime: { $gt: clientStartTime}, rgb: { $exists: true} };
-
-    var chart = d3.select("#viz")
-
-    Deps.autorun(function () {
-      chart.selectAll("div")
-        .data(Colonies.find().fetch())
-        .enter()
-        .append("div")
-        // .style("width", function(d, i) { return d3.rgb(d.rgb[0], d.rgb[1], d.rgb[2])})
-        .style("background-color", hslaify)
-        .style("height", function() { return "4px" })
-        .style("width", function (d) { 
-          console.log(d.Area);
-          return d.Area + "px";
-          })
-    });
-  };
-
-  */
-
