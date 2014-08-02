@@ -1,6 +1,5 @@
 {
   "packages": {
-    "server-eval": {},
     "http-methods": {}
   }
 }
