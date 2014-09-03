@@ -1,1 +1,20 @@
-/* CSS declarations go here */
+body {
+  font: 10px sans-serif;
+  color: #aaa;
+  background: #181818;
+}
+
+.pearl {
+  display: inline-block;
+  border-radius: 50%; 
+}
+
+.radial {
+  fill: #fff;
+  opacity: 0.7;
+}
+
+.grid {
+  stroke: #fff;
+  fill: none;
+}

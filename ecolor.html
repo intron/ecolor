@@ -3,30 +3,34 @@
 </head>
 
 <body>
-
-  {{> hello}}
-  {{> experimentDiv}}
-  {{> visualizations}}
-
+  {{> circles}}
+  {{> wheel}}
 </body>
+
+<template name="circles">
+  <div id="circles"></div>
+</template>
+
+<template name="wheel">
+  <div id="wheel"></div>
+</template>
+
+<!--
+  not actually tied to any experiments right now
 
 <template name="hello">
   <h1>ecolor.js</h1>
-  {{greeting}}
-  <input type="button" value="createExperiment"/>
+  <button id="generateExperiment">Generate Experiment!</button>
 </template>
 
 <template name="experimentDiv">
-  {{#each experiments}}
-    <div>
-      <h1>{{_id}}</h1>
-    </div>
-  {{/each}}
-</template>
-
-<template name="visualizations">
-  <div id="viz">
-    <h1>Visualizations</h1>
+  <div>
+    {{#each experiments}}
+      <div>
+        <span>{{_id}}</span>
+      </div>
+    {{/each}}
   </div>
 </template>
 
+-->
