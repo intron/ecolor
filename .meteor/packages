@@ -4,7 +4,8 @@
 # but you can also edit it by hand.
 
 standard-app-packages
-autopublish
 insecure
 d3
 http-methods
+reactive-dict
+

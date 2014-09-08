@@ -3,34 +3,20 @@
 </head>
 
 <body>
-  {{> circles}}
-  {{> wheel}}
+  {{> test}}
+  {{> visualization}}
 </body>
 
-<template name="circles">
-  <div id="circles"></div>
+<template name="test">
+  <button id="generateExperiment">Generate Experiment</button>
+  <button id="generateVisualization">Generate Visualization</button>
+  <button id="clearVisualization">Clear Visualization</button>
 </template>
 
-<template name="wheel">
+<template name="visualization">
+  <h1>ecolor.js</h1>
+  <h2>{{experimentsCount}} experiments performed</h2>
+  <h2>{{coloniesCount}} colonies detected</h2>
+  <div id="circles"></div>
   <div id="wheel"></div>
 </template>
-
-<!--
-  not actually tied to any experiments right now
-
-<template name="hello">
-  <h1>ecolor.js</h1>
-  <button id="generateExperiment">Generate Experiment!</button>
-</template>
-
-<template name="experimentDiv">
-  <div>
-    {{#each experiments}}
-      <div>
-        <span>{{_id}}</span>
-      </div>
-    {{/each}}
-  </div>
-</template>
-
--->
