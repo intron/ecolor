@@ -1,62 +1,131 @@
 var fs = Npm.require("fs")
 
-// completely arbitrary value
-// makes a good looking visualization though
-var numBins = 100 
-
+// completely arbitrary
+var numBins = 80
 
 Meteor.startup(function() {
-
-  var initializing = true
-
-  Visualizations.upsert({'id': 'bins'}, {$set : {'id': 'bins'}})
-  Visualizations.upsert({'id': 'stats'}, {$set : {'id': 'stats'}})
 
   Meteor.publish('visualizations', function() {
     return Visualizations.find()
   })
-  
-  // TODO add removed method to make reversible
-  Experiments.find().observeChanges({
 
-    // TODO add rarity calculation
-    added: function(id, fields) {
-      
+  clearVisualization()
+
+  // don't act on changes while loading existing collections
+  var initializing = true
+
+  // watch Experiments collection for added and removed experiment records
+  // update Visualizations collection accordingly
+  Experiments.find().observe({
+
+    added: function(document) {
       if (!initializing) {
-        console.log("Mongo observer added experiment: " + id)
+        console.log("I see you've added an experiment: " + document.dishBarcode)
 
         var coloniesAdded = 0,
-            // oldData = Visualizations.find({'id': 'bins'}).fetch()[0].data,
-            hueBins = Array.apply(null, new Array(numBins)).map(Number.prototype.valueOf,0),
-            rarityBins = Array.apply(null, new Array(numBins)).map(Number.prototype.valueOf,0)
+            newData = Visualizations.findOne({'id': 'bins'}).data
 
-        fields.colonyData.forEach(function(colony) {
+        document.colonyData.forEach(function(colony) {
           coloniesAdded++
-          hueBins[Math.floor((colony.Hue / 255) * numBins)]++
-          // rarity calculation
+          newData[Math.floor(colony.Hue * (numBins / 255))].count++
         })
 
-        //var newData = oldData.map(function(d, i) {
-        //  d.count += hueBins[i]
-        //  // d.rarity = rarityBins[i]
-        //})
-
-        // update visualization stats
         Visualizations.update({'id': 'stats'}, {$inc: {
           coloniesCount: coloniesAdded,
           experimentsCount: 1}
         })
-        //Visualizations.update({'id': 'bins'}, {data: newData})
+
+        Visualizations.update({'id': 'bins'}, {$set: {data: newData}})
+      }
+    },
+
+    removed: function(document) {
+      if (!initializing) {
+        console.log("I see you've removed an experiment: " + document.dishBarcode) 
+        
+        var coloniesRemoved = 0,
+            newData = Visualizations.findOne({'id': 'bins'}).data
+
+        document.colonyData.forEach(function(colony) {
+          coloniesRemoved++
+          newData[Math.floor(colony.Hue * (numBins / 255))].count--
+        })
+
+        Visualizations.update({'id': 'stats'}, {$inc: {
+          coloniesCount: -coloniesRemoved,
+          experimentsCount: -1}
+        })
+
+        Visualizations.update({'id': 'bins'}, {$set: {data: newData}})
       }
     }
   })
-  initializing = false
 
+  Visualizations.find({'id': 'stats'}).observe({
+    changed: function(newDocument) {
+      if (!initializing) {
+        console.log("I see you've changed the Visualizations collection")
+
+        var coloniesCount = Visualizations.findOne({'id': 'stats'}).coloniesCount
+        var newData = Visualizations.findOne({'id': 'bins'}).data
+        var maxRarity = 0
+
+        newData.forEach(function(d) {
+          d.rarity = d.count / coloniesCount
+          if (d.rarity > maxRarity) maxRarity = d.rarity
+        })
+
+        // normalize values to 1
+        newData.forEach(function(d) {
+          d.rarity = d.rarity / maxRarity
+        })
+
+        Visualizations.update({'id': 'bins'}, {$set: {data: newData}}, function(err, res) {
+          console.log("Visualizations observer updated " + res + " rarity values")
+        })
+      }
+    }
+  })
+
+  initializing = false
 })
 
 
-
 Meteor.methods({
+
+  // generate random data for visualization
+  // TODO watch Experiments for changes and update visualization accordingly
+  generateVisualization: function() {
+    console.log("generating random visualization record...")                       
+
+    var data = []
+
+    while (data.length < numBins) {
+      var d = {}
+      // order of colors matters
+      // same as order in visualization
+      d.color = hueToHsl(Math.floor((data.length / numBins) * 360))
+      d.count = Math.floor(Math.random() * 1000)
+      d.rarity = Math.random()
+      data.push(d)
+    }
+
+    var coloniesCount = data.map(function(d) {return d.count}).reduce(function(a, b) {return a + b})
+    var experimentsCount = 1337
+
+    Visualizations.update({'id': 'bins'}, {$set: {data: data}})
+
+    Visualizations.update({'id': 'stats'}, {$set: {
+        coloniesCount: coloniesCount,
+        experimentsCount: experimentsCount
+      }
+    })
+  },
+
+ clearVisualization: function() {
+    console.log("clearing visualization record...")                       
+    clearVisualization()
+  },
 
   // create an experiment record using the colonyData.json as model
   // self-invoking function keeps a counter inside closure
@@ -97,58 +166,17 @@ Meteor.methods({
       ))
     }
   }(),
+  
+  // remove experiment record with specified dishBarcode
+  removeExperiment: function(dishBarcode) {
 
-  // generate random data for visualization
-  // TODO watch Experiments for changes and update visualization accordingly
-  generateVisualization: function() {
-    console.log("generating random visualization record...")                       
-
-    var data = []
-
-    while (data.length < numBins) {
-      var d = {}
-      // order of colors matters
-      // same as order in visualization
-      d.color = hueToHsl(Math.floor((data.length / numBins) * 360))
-      d.count = Math.floor(Math.random() * 1000)
-      d.rarity = Math.random()
-      data.push(d)
-    }
-
-    var coloniesCount = data.map(function(d) {return d.count}).reduce(function(a, b) {return a + b})
-    var experimentsCount = 1337
-
-    Visualizations.upsert({'id': 'bins'}, {$set: {
-      data: data}
-    })
-
-    Visualizations.upsert({'id': 'stats'}, {$set: {
-      coloniesCount: coloniesCount,
-      experimentsCount: experimentsCount}
-    })
-  },
-
- clearVisualization: function() {
-    console.log("clearing visualization record...")                       
-
-    var data = []
-
-    while (data.length < numBins) {
-      var d = {}
-      // order of colors matters
-      // same as order in visualization
-      d.color = hueToHsl(Math.floor((data.length / numBins) * 360))
-      d.count = 0
-      d.rarity = 1
-      data.push(d)
-    }
-
-    Visualizations.upsert({'id': 'bins'}, {$set: {
-      data: data}
-    })
-    Visualizations.upsert({'id': 'stats'}, {$set: {
-      coloniesCount: 0,
-      experimentsCount: 0}
+    Experiments.remove({'dishBarcode': dishBarcode}, function(err, res) {
+      if (err) {
+        console.log("Error removing experiment: " + err)
+        return
+      }
+      if (res === 0) console.log("No experiment with dishBarcode = " + dishBarcode + " was found")
+      console.log("removeExperiment removed " + res + " experiments")
     })
   }
 
@@ -163,75 +191,22 @@ Meteor.methods({
 
 var hueToHsl = function(hue) {return "hsl(" + hue + ",50%,50%)"}
 
-
-
-//
-//
-//
-//
-// TODO phase out HTTP methods, as we will be using a single DB
-//
-//
-//
-//
-//
-HTTP.methods({
-  'uploadColonyData': function(data) {
-    console.log('/uploadColonyData contacted')
-    console.log(this.requestHeaders)
-    var dishBarcode = this.requestHeaders.dishbarcode
-    var userBarcode = this.requestHeaders.userbarcode
-    var timestamp = this.requestHeaders.timestamp
-    
-    // quit if we already have colonies with this dish's barcode in the db
-    if(Colonies.findOne({dishBarcode: dishBarcode})) {
-     var msg = 'This dish was already scanned into the database.  Quitting.'
-     console.log(msg)
-     // TODO post response
-     return
-    }
-
-    // add each colony individually to the Colonies collection
-    var colonyData = JSON.parse(data)
-    var count = 0
-    colonyData.forEach(function(colony) {
-      colony.dishBarcode = dishBarcode
-      Colonies.insert(colony)
-      count++
-    });
-    console.log('added colonies: ' + count)
-
-    // add a record for the experiment to the Experiments collection
-    Experiments.upsert({dishBarcode: dishBarcode}, {$set: {
-      dishBarcode: dishBarcode,
-      userBarcode: userBarcode,
-      timestamp: timestamp,
-      colonyData: colonyData}})
-  },
-
-  'uploadDishImage': function(data) {
-    console.log('/uploadDishImage contacted')
-    console.log(this.requestHeaders)
-    var dishBarcode = this.requestHeaders.dishbarcode
-
-    if(this.requestHeaders['content-type'].indexOf('image/', 0) !== 0) {
-      console.log('wrong content type uploaded')
-    }
-    else if(this.requestHeaders.filename == undefined) {
-      console.log('no filename given in header')
-    }
-    else {
-      // writeFile requires full path; assume the filename we're given in the
-      // headers is unique
-      // TODO figure out relative path
-      var imageStorageLocation = 'images/'
-      var filepath = imageStorageLocation + this.requestHeaders.filename
-      // fs.writeFileSync(filepath, data);
-      // assume the colony data is uploaded before image
-      // just store filename for now, not the image's data
-      var vals = {dishImageFilename: filepath}
-      Experiments.upsert({dishBarcode: dishBarcode}, {$set: vals})
-      return 'TODO: reply to post'
-    }
+var clearVisualization = function() {
+  var data = []
+  while (data.length < numBins) {
+    var d = {}
+    d.color = hueToHsl(Math.floor((data.length / numBins) * 360))
+    d.count = 0
+    d.rarity = 0.5
+    data.push(d)
   }
-});
+  Visualizations.upsert({'id': 'bins'}, {$set: {
+      data: data
+    }
+  })
+  Visualizations.upsert({'id': 'stats'}, {$set: {
+      coloniesCount: 0,
+      experimentsCount: 0
+    }
+  })
+}
