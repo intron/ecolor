@@ -54,6 +54,9 @@ Template.visualization.helpers({
 
 Meteor.startup(function() {
 
+  // replicate Experiments collection for debugging purposes
+  Meteor.subscribe('experiments')
+
   // don't recreate the SVG element
   var svg = d3.select('#wheel').append('svg'),
       plot = svg.append('g')
@@ -114,16 +117,16 @@ Meteor.startup(function() {
       var slice = plot.selectAll('path')
           .data(pie(data))
       plot.selectAll('path')
-          .classed('pulse', false)
+          // only updated slices pulse
+          .classed('pulse', function(d) {return d.data.changed})
       slice.exit().remove()
       slice.enter()
         .append('path')
           .style('fill', function(d) { return d.data.color })
-      // updated slices should attract attention
       slice
           .transition().ease('elastic', 8, 0.1)
           .attr('d', arc)
-          .attr('class', 'pulse')
+
 //
 //
 //      /////////////////////////////////////////////////
@@ -146,14 +149,11 @@ Meteor.startup(function() {
 //          .style('background-color', function(d) { return d.color })
 //      // updated circles should attract attention
 //      circle
-//          .style('background-color', 'white')
 //          .transition().ease('elastic', 8, 0.1)
 //          .style('width', function(d) { return Math.floor(Math.sqrt(d.count) * scalingFactor) + 'px' })
 //          .style('height', function(d) { return Math.floor(Math.sqrt(d.count) * scalingFactor) + 'px' })
 //          .transition().ease('linear').delay(3000)
-//          .style('background-color', function(d) { return d.color })
-//          .attr('class', 'pulse')
-//
+
     })
   })
 })

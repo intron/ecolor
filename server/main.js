@@ -5,11 +5,16 @@ var numBins = 80
 
 Meteor.startup(function() {
 
+  clearVisualization()
+
+  // publish Experiments colletion for debugging purposes
+  Meteor.publish('experiments', function() {
+    return Experiments.find()
+  })
+
   Meteor.publish('visualizations', function() {
     return Visualizations.find()
   })
-
-  clearVisualization()
 
   // don't act on changes while loading existing collections
   var initializing = true
@@ -25,9 +30,13 @@ Meteor.startup(function() {
         var coloniesAdded = 0,
             newData = Visualizations.findOne({'id': 'bins'}).data
 
+        newData.forEach(function(d) {d.changed = false})
+
         document.colonyData.forEach(function(colony) {
           coloniesAdded++
-          newData[Math.floor(colony.Hue * (numBins / 255))].count++
+          var changedBin = Math.floor(colony.Hue * (numBins / 255))
+          newData[changedBin].count++
+          newData[changedBin].changed = true
         })
 
         Visualizations.update({'id': 'stats'}, {$inc: {
@@ -197,7 +206,8 @@ var clearVisualization = function() {
     var d = {}
     d.color = hueToHsl(Math.floor((data.length / numBins) * 360))
     d.count = 0
-    d.rarity = 0.5
+    d.rarity = 0
+    d.changed = false
     data.push(d)
   }
   Visualizations.upsert({'id': 'bins'}, {$set: {
