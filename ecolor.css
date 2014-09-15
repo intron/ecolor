@@ -4,6 +4,34 @@ body {
   background: #181818;
 }
 
+.radial-grid {
+  stroke: #888;
+  fill: none;
+}
+
+.pulse {
+  -webkit-animation-name: 'pulse_animation';
+  -webkit-animation-duration: 3000ms;
+  -webkit-animation-delay: 8s;
+  -webkit-animation-iteration-count: infinite;
+  -webkit-animation-timing-function: ease-in-out;
+}
+
+@-webkit-keyframes pulse_animation {
+  20% {stroke-width: 0;}
+  45% {
+    stroke-width: 1;
+    stroke: white;}
+  60% {stroke-width: 0;}
+  75% {
+    stroke-width: 1;
+    stroke: white;}
+  90% {stroke-width: 0;}
+}
+
+
+
+/*
 #circles {
   text-align: center;
 }
@@ -13,31 +41,6 @@ body {
   border-radius: 50%; 
   position: relative;
   top: 50%;
-
   transform: translateY(50%);
-
 }
-
-.radial-grid {
-  stroke: #fff;
-  fill: none;
-}
-
-@-webkit-keyframes pulse_animation {
-  0% { -webkit-transform: scale(1); }
-  20% { -webkit-transform: scale(1); }
-  40% { -webkit-transform: scale(1.1); }
-  50% { -webkit-transform: scale(1.05); }
-  60% { -webkit-transform: scale(1.1); }
-  70% { -webkit-transform: scale(1); }
-  80% { -webkit-transform: scale(1); }
-  100% { -webkit-transform: scale(1); }
-}
-
-.pulse {
-  -webkit-animation-name: 'pulse_animation';
-  -webkit-animation-duration: 3000ms;
-  -webkit-transform-origin:50% 50%;
-  -webkit-animation-iteration-count: infinite;
-  -webkit-animation-timing-function: ease;
-}
+*/

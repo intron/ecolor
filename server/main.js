@@ -25,7 +25,6 @@ Meteor.startup(function() {
 
     added: function(document) {
       if (!initializing) {
-        console.log("I see you've added an experiment: " + document.dishBarcode)
 
         var coloniesAdded = 0,
             newData = Visualizations.findOne({'id': 'bins'}).data
@@ -50,7 +49,6 @@ Meteor.startup(function() {
 
     removed: function(document) {
       if (!initializing) {
-        console.log("I see you've removed an experiment: " + document.dishBarcode) 
         
         var coloniesRemoved = 0,
             newData = Visualizations.findOne({'id': 'bins'}).data
@@ -73,14 +71,13 @@ Meteor.startup(function() {
   Visualizations.find({'id': 'stats'}).observe({
     changed: function(newDocument) {
       if (!initializing) {
-        console.log("I see you've changed the Visualizations collection")
 
         var coloniesCount = Visualizations.findOne({'id': 'stats'}).coloniesCount
         var newData = Visualizations.findOne({'id': 'bins'}).data
         var maxRarity = 0
 
         newData.forEach(function(d) {
-          d.rarity = d.count / coloniesCount
+          d.rarity = coloniesCount / (d.count || 1 )
           if (d.rarity > maxRarity) maxRarity = d.rarity
         })
 
@@ -89,9 +86,7 @@ Meteor.startup(function() {
           d.rarity = d.rarity / maxRarity
         })
 
-        Visualizations.update({'id': 'bins'}, {$set: {data: newData}}, function(err, res) {
-          console.log("Visualizations observer updated " + res + " rarity values")
-        })
+        Visualizations.update({'id': 'bins'}, {$set: {data: newData}})
       }
     }
   })
@@ -105,15 +100,14 @@ Meteor.methods({
   // generate random data for visualization
   // TODO watch Experiments for changes and update visualization accordingly
   generateVisualization: function() {
-    console.log("generating random visualization record...")                       
 
     var data = []
 
     while (data.length < numBins) {
       var d = {}
-      // order of colors matters
+      // order of hues matters
       // same as order in visualization
-      d.color = hueToHsl(Math.floor((data.length / numBins) * 360))
+      d.hue = Math.floor((data.length / numBins) * 360)
       d.count = Math.floor(Math.random() * 1000)
       d.rarity = Math.random()
       data.push(d)
@@ -132,7 +126,6 @@ Meteor.methods({
   },
 
  clearVisualization: function() {
-    console.log("clearing visualization record...")                       
     clearVisualization()
   },
 
@@ -160,9 +153,6 @@ Meteor.methods({
             // set random values
             colony.Hue = Math.floor(Math.random() * 255) 
           });
-
-          console.log('generateExperiment added ' + count + ' colonies')
-          console.log('generateExperiment added experiment: ' + dishBarcode)
 
           // add a record for the experiment to the Experiments collection
           Experiments.insert({
@@ -198,13 +188,11 @@ Meteor.methods({
 //
 ////////////////////////////////////////////////
 
-var hueToHsl = function(hue) {return "hsl(" + hue + ",50%,50%)"}
-
 var clearVisualization = function() {
   var data = []
   while (data.length < numBins) {
     var d = {}
-    d.color = hueToHsl(Math.floor((data.length / numBins) * 360))
+    d.hue = Math.floor((data.length / numBins) * 360)
     d.count = 0
     d.rarity = 0
     d.changed = false

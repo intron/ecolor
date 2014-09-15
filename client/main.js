@@ -68,11 +68,23 @@ Meteor.startup(function() {
     Tracker.autorun(function() {
 
       // reactive with respect to window width and visualization data
-      var width = rwindow.get('$width'),
-          height = rwindow.get('$height'),
-          data = Visualizations.find({'id': 'bins'}).fetch()[0].data
+      var padding = 100,
+          width = rwindow.get('$width') - (padding * 2),
+          height = rwindow.get('$height') - (padding * 2),
+          data = Visualizations.find({'id': 'bins'}).fetch()[0].data,
+          numBins = data.length
 
-    
+
+
+      /////////////////////////////////////////////////
+      //
+      // helpers
+      //
+      ////////////////////////////////////////////////
+
+      var hueToHsl = function(hue) {return "hsl(" + hue + ",50%,50%)"}
+
+
       /////////////////////////////////////////////////
       //
       // wheel
@@ -116,17 +128,38 @@ Meteor.startup(function() {
       // draw slices
       var slice = plot.selectAll('path')
           .data(pie(data))
-      plot.selectAll('path')
-          // only updated slices pulse
-          .classed('pulse', function(d) {return d.data.changed})
       slice.exit().remove()
       slice.enter()
         .append('path')
-          .style('fill', function(d) { return d.data.color })
+          .style('fill', function(d) {return hueToHsl(d.data.hue)})
       slice
-          .transition().ease('elastic', 8, 0.1)
+          .classed('pulse', false)
           .attr('d', arc)
+      slice
+        .transition()
+          .ease('elastic', 2, 0.001)
+          .style('opacity', function(d) {return d.data.changed ? 1 : 0})
+          .attr('transform', function(d) {return 'scale(' + (d.data.changed ? d.data.changed * 1.5 : 1) + ')'})
+        .transition()
+          .duration(1000)
+          .delay(5000)
+          .style('opacity', 1)
+          .attr('transform', 'scale(1)')
+      setTimeout(function() {
+        slice
+            .classed('pulse', function(d) {return d.data.changed})
+      }, 100)
+      
 
+
+
+//      /////////////////////////////////////////////////
+//      //
+//      // helpers
+//      //
+//      ////////////////////////////////////////////////
+//
+//      var hueToHsl = function(hue) {return "hsl(" + hue + ",50%,50%)"}
 //
 //
 //      /////////////////////////////////////////////////
@@ -146,7 +179,7 @@ Meteor.startup(function() {
 //          .classed('pulse', false)
 //      circle.exit().remove()
 //      circle.enter().append('div')
-//          .style('background-color', function(d) { return d.color })
+//          .style('background-color', function(d) {return hueToHsl(d.hue)})
 //      // updated circles should attract attention
 //      circle
 //          .transition().ease('elastic', 8, 0.1)
