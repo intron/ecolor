@@ -8,16 +8,15 @@
 </body>
 
 <template name="test">
-  <button id="generateVisualization">Generate Visualization</button>
+  <button id="updateVisualization">Update Visualization</button>
   <button id="clearVisualization">Clear Visualization</button>
   <button id="generateExperiment">Generate Experiment</button>
   <button id="removeExperiment">Remove Experiment</button>
-  <input id="dishBarcodeToRemove" type="text" placeholder="dish barcode to remove" size=30>
+  <input id="plateBarcodeToRemove" type="text" placeholder="plateBarcode to remove" size=30>
 </template>
 
 <template name="visualization">
-  <h1>ecolor.js</h1>
-  <h2>{{experimentsCount}} experiments performed</h2>
-  <h2>{{coloniesCount}} colonies detected</h2>
+  <h1>{{experimentsCount}} experiments performed</h1>
+  <h1>{{coloniesCount}} colonies detected</h1>
   <div id="wheel"></div>
 </template>

@@ -5,8 +5,8 @@
 ////////////////////////////////////////////////
 Template.test.events({
   // create a record in Visualizations
-  'click #generateVisualization': function() {
-    Meteor.call('generateVisualization')
+  'click #updateVisualization': function() {
+    Meteor.call('updateVisualization')
   },
   // clear Visualizations records
   'click #clearVisualization': function() {
@@ -18,8 +18,8 @@ Template.test.events({
   },
   // create a record in Experiments
   'click #removeExperiment': function() {
-    var dishBarcode = $('#dishBarcodeToRemove').val()
-    Meteor.call('removeExperiment', dishBarcode)
+    var plateBarcode = $('#plateBarcodeToRemove').val()
+    Meteor.call('removeExperiment', plateBarcode)
   }
 })
 
@@ -108,8 +108,13 @@ Meteor.startup(function() {
 
       // radial amplitude proportional to rarity
       var arc = d3.svg.arc()
-                  .outerRadius(function(d) {return Math.floor(minRadius + (maxRadius - minRadius) * d.data.rarity)})
-                  .innerRadius(minRadius)
+          .outerRadius(function(d) {
+            // set minimum radial amplitude for slices
+            var startRadius = minRadius + 10
+            var range = (maxRadius - startRadius)
+            return (startRadius + (range * d.data.rarity))
+          })
+          .innerRadius(minRadius)
 
       // area of slice proportional to count
       var pie = d3.layout.pie()

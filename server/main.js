@@ -1,12 +1,11 @@
 var fs = Npm.require("fs")
 
-// completely arbitrary
 var numBins = 80,
     maxHue = 360
 
 Meteor.startup(function() {
 
-  clearVisualization()
+  updateVisualization()
 
   // publish Experiments colletion for debugging purposes
   Meteor.publish('experiments', function() {
@@ -98,35 +97,13 @@ Meteor.startup(function() {
 
 Meteor.methods({
 
-  // generate random data for visualization
-  // TODO watch Experiments for changes and update visualization accordingly
-  generateVisualization: function() {
-
-    var data = []
-
-    while (data.length < numBins) {
-      var d = {}
-      // order of hues matters
-      // same as order in visualization
-      d.hue = Math.floor((data.length / numBins) * maxHue)
-      d.count = Math.floor(Math.random() * 1000)
-      d.rarity = Math.random()
-      data.push(d)
-    }
-
-    var coloniesCount = data.map(function(d) {return d.count}).reduce(function(a, b) {return a + b})
-    var experimentsCount = 1337
-
-    Visualizations.update({'id': 'bins'}, {$set: {data: data}})
-
-    Visualizations.update({'id': 'stats'}, {$set: {
-        coloniesCount: coloniesCount,
-        experimentsCount: experimentsCount
-      }
-    })
+  // update Visualizations collection with new Experiments
+  updateVisualization: function() {
+    updateVisualization()
   },
 
- clearVisualization: function() {
+  // reset Visualizations records' data to 0
+  clearVisualization: function() {
     clearVisualization()
   },
 
@@ -134,17 +111,16 @@ Meteor.methods({
   // self-invoking function keeps a counter inside closure
   generateExperiment : function() {
     var filepath = '/Users/intron/Dev/thetech/ecolor/test/colonyData.json',
-        dishCounter = 0,
-        userCounter = 0
+        userBarcode = 'fubar',
+        plateCounter = Experiments.find().count() || 0
 
     // return inner function to increment counters
     return function() {
       fs.readFile(filepath, Meteor.bindEnvironment(
         function(err, data) {
 
-          var dishBarcode = 'dish' + ++dishCounter,
-              userBarcode = 'user' + ++userCounter,
-              timestamp = Date.now()
+          var plateBarcode = 'plate' + ++plateCounter,
+              dateCreated = Date.now()
 
           var colonyData = JSON.parse(data),
               count = 0
@@ -157,9 +133,9 @@ Meteor.methods({
 
           // add a record for the experiment to the Experiments collection
           Experiments.insert({
-            dishBarcode: dishBarcode,
+            plateBarcode: plateBarcode,
             userBarcode: userBarcode,
-            timestamp: timestamp,
+            dateCreated: dateCreated,
             colonyData: colonyData
           })
         }
@@ -167,15 +143,15 @@ Meteor.methods({
     }
   }(),
   
-  // remove experiment record with specified dishBarcode
-  removeExperiment: function(dishBarcode) {
+  // remove experiment record with specified plateBarcode
+  removeExperiment: function(plateBarcode) {
 
-    Experiments.remove({'dishBarcode': dishBarcode}, function(err, res) {
+    Experiments.remove({'plateBarcode': plateBarcode}, function(err, res) {
       if (err) {
         console.log("Error removing experiment: " + err)
         return
       }
-      if (res === 0) console.log("No experiment with dishBarcode = " + dishBarcode + " was found")
+      if (res === 0) console.log("No experiment with plateBarcode = " + plateBarcode + " was found")
       console.log("removeExperiment removed " + res + " experiments")
     })
   }
@@ -208,4 +184,36 @@ var clearVisualization = function() {
       experimentsCount: 0
     }
   })
+}
+
+var updateVisualization = function() {
+  var supposedCount = Visualizations.find({'id': 'stats'}).experimentsCount,
+      actualCount = Experiments.find().count(),
+      newExperiments = actualCount - supposedCount
+  if (newExperiments > 0) {
+    console.log("MOAR EXPERIMENTS!!!!")
+
+    var experimentsToAdd = Experiments.find({}, {sort: {dateCreated: -1}, limit: newExperiments}).fetch()
+    console.log(experimentsToAdd)
+
+    var newData = Visualizations.findOne({'id': 'bins'}).data
+    newData.forEach(function(d) {d.changed = false})
+
+    experimentsToAdd.forEach(function(document) {
+      var coloniesAdded = 0
+      document.colonyData.forEach(function(colony) {
+        coloniesAdded++
+        var changedBin = Math.floor(colony.Hue * (numBins / maxHue))
+        newData[changedBin].count++
+        newData[changedBin].changed = true
+      })
+      Visualizations.update({'id': 'stats'}, {$inc: {
+        coloniesCount: coloniesAdded,
+        experimentsCount: 1}
+      })
+      Visualizations.update({'id': 'bins'}, {$set: {data: newData}})
+    })
+  }
+  else if (newExperiments == 0) {console.log("Visualizations collection is up-to-date")}
+  else if (newExperiments < 0) {console.log("You done goofed buddy")}
 }
