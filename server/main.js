@@ -5,7 +5,8 @@ var numBins = 80,
 
 Meteor.startup(function() {
 
-  updateVisualization()
+  clearVisualization()
+  updateRarity()
 
   // publish Experiments colletion for debugging purposes
   Meteor.publish('experiments', function() {
@@ -16,91 +17,60 @@ Meteor.startup(function() {
     return Visualizations.find()
   })
 
-  // don't act on changes while loading existing collections
-  var initializing = true
-
   // watch Experiments collection for added and removed experiment records
   // update Visualizations collection accordingly
   Experiments.find().observe({
 
     added: function(document) {
-      if (!initializing) {
 
-        var coloniesAdded = 0,
-            newData = Visualizations.findOne({'id': 'bins'}).data
+      var coloniesAdded = 0,
+          newData = Visualizations.findOne({'id': 'bins'}).data
 
-        newData.forEach(function(d) {d.changed = false})
+      newData.forEach(function(d) {d.changed = false})
 
-        document.colonyData.forEach(function(colony) {
-          coloniesAdded++
-          var changedBin = Math.floor(colony.Hue * (numBins / maxHue))
-          newData[changedBin].count++
-          newData[changedBin].changed = true
-        })
+      document.colonyData.forEach(function(colony) {
+        coloniesAdded++
+        var changedBin = Math.floor(colony.Hue * (numBins / maxHue))
+        newData[changedBin].count++
+        newData[changedBin].changed = true
+      })
 
-        Visualizations.update({'id': 'stats'}, {$inc: {
-          coloniesCount: coloniesAdded,
-          experimentsCount: 1}
-        })
+      Visualizations.update({'id': 'stats'}, {$inc: {
+        coloniesCount: coloniesAdded,
+        experimentsCount: 1}
+      })
 
-        Visualizations.update({'id': 'bins'}, {$set: {data: newData}})
-      }
+      Visualizations.update({'id': 'bins'}, {$set: {data: newData}})
     },
 
     removed: function(document) {
-      if (!initializing) {
-        
-        var coloniesRemoved = 0,
-            newData = Visualizations.findOne({'id': 'bins'}).data
 
-        document.colonyData.forEach(function(colony) {
-          coloniesRemoved++
-          newData[Math.floor(colony.Hue * (numBins / maxHue))].count--
-        })
+      var coloniesRemoved = 0,
+          newData = Visualizations.findOne({'id': 'bins'}).data
 
-        Visualizations.update({'id': 'stats'}, {$inc: {
-          coloniesCount: -coloniesRemoved,
-          experimentsCount: -1}
-        })
+      document.colonyData.forEach(function(colony) {
+        coloniesRemoved++
+        newData[Math.floor(colony.Hue * (numBins / maxHue))].count--
+      })
 
-        Visualizations.update({'id': 'bins'}, {$set: {data: newData}})
-      }
+      Visualizations.update({'id': 'stats'}, {$inc: {
+        coloniesCount: -coloniesRemoved,
+        experimentsCount: -1}
+      })
+
+      Visualizations.update({'id': 'bins'}, {$set: {data: newData}})
     }
   })
+
 
   Visualizations.find({'id': 'stats'}).observe({
-    changed: function(newDocument) {
-      if (!initializing) {
-
-        var coloniesCount = Visualizations.findOne({'id': 'stats'}).coloniesCount
-        var newData = Visualizations.findOne({'id': 'bins'}).data
-        var maxRarity = 0
-
-        newData.forEach(function(d) {
-          d.rarity = coloniesCount / (d.count || 1 )
-          if (d.rarity > maxRarity) maxRarity = d.rarity
-        })
-
-        // normalize values to 1
-        newData.forEach(function(d) {
-          d.rarity = d.rarity / maxRarity
-        })
-
-        Visualizations.update({'id': 'bins'}, {$set: {data: newData}})
-      }
-    }
+    changed: updateRarity()
   })
 
-  initializing = false
 })
 
 
 Meteor.methods({
-
-  // update Visualizations collection with new Experiments
-  updateVisualization: function() {
-    updateVisualization()
-  },
 
   // reset Visualizations records' data to 0
   clearVisualization: function() {
@@ -186,34 +156,22 @@ var clearVisualization = function() {
   })
 }
 
-var updateVisualization = function() {
-  var supposedCount = Visualizations.find({'id': 'stats'}).experimentsCount,
-      actualCount = Experiments.find().count(),
-      newExperiments = actualCount - supposedCount
-  if (newExperiments > 0) {
-    console.log("MOAR EXPERIMENTS!!!!")
 
-    var experimentsToAdd = Experiments.find({}, {sort: {dateCreated: -1}, limit: newExperiments}).fetch()
-    console.log(experimentsToAdd)
+var updateRarity = function() {
 
-    var newData = Visualizations.findOne({'id': 'bins'}).data
-    newData.forEach(function(d) {d.changed = false})
+  var coloniesCount = Visualizations.findOne({'id': 'stats'}).coloniesCount
+  var newData = Visualizations.findOne({'id': 'bins'}).data
+  var maxRarity = 0
 
-    experimentsToAdd.forEach(function(document) {
-      var coloniesAdded = 0
-      document.colonyData.forEach(function(colony) {
-        coloniesAdded++
-        var changedBin = Math.floor(colony.Hue * (numBins / maxHue))
-        newData[changedBin].count++
-        newData[changedBin].changed = true
-      })
-      Visualizations.update({'id': 'stats'}, {$inc: {
-        coloniesCount: coloniesAdded,
-        experimentsCount: 1}
-      })
-      Visualizations.update({'id': 'bins'}, {$set: {data: newData}})
-    })
-  }
-  else if (newExperiments == 0) {console.log("Visualizations collection is up-to-date")}
-  else if (newExperiments < 0) {console.log("You done goofed buddy")}
+  newData.forEach(function(d) {
+    d.rarity = coloniesCount / (d.count || 1 )
+    if (d.rarity > maxRarity) maxRarity = d.rarity
+  })
+
+  // normalize values to 1
+  newData.forEach(function(d) {
+    d.rarity = d.rarity / maxRarity
+  })
+
+  Visualizations.update({'id': 'bins'}, {$set: {data: newData}})
 }

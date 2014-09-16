@@ -4,10 +4,6 @@
 //
 ////////////////////////////////////////////////
 Template.test.events({
-  // create a record in Visualizations
-  'click #updateVisualization': function() {
-    Meteor.call('updateVisualization')
-  },
   // clear Visualizations records
   'click #clearVisualization': function() {
     Meteor.call('clearVisualization')
@@ -91,7 +87,7 @@ Meteor.startup(function() {
 
       var minRadius = 80,
           maxRadius = Math.floor((Math.min(width, height) / 2) - minRadius),
-          numTicks = 10
+          numTicks = 8
 
       var radialScale = d3.scale.linear().domain([0, 1]).range([minRadius, maxRadius])
 
