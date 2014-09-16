@@ -1,7 +1,8 @@
 var fs = Npm.require("fs")
 
 // completely arbitrary
-var numBins = 80
+var numBins = 80,
+    maxHue = 360
 
 Meteor.startup(function() {
 
@@ -33,7 +34,7 @@ Meteor.startup(function() {
 
         document.colonyData.forEach(function(colony) {
           coloniesAdded++
-          var changedBin = Math.floor(colony.Hue * (numBins / 255))
+          var changedBin = Math.floor(colony.Hue * (numBins / maxHue))
           newData[changedBin].count++
           newData[changedBin].changed = true
         })
@@ -55,7 +56,7 @@ Meteor.startup(function() {
 
         document.colonyData.forEach(function(colony) {
           coloniesRemoved++
-          newData[Math.floor(colony.Hue * (numBins / 255))].count--
+          newData[Math.floor(colony.Hue * (numBins / maxHue))].count--
         })
 
         Visualizations.update({'id': 'stats'}, {$inc: {
@@ -107,7 +108,7 @@ Meteor.methods({
       var d = {}
       // order of hues matters
       // same as order in visualization
-      d.hue = Math.floor((data.length / numBins) * 360)
+      d.hue = Math.floor((data.length / numBins) * maxHue)
       d.count = Math.floor(Math.random() * 1000)
       d.rarity = Math.random()
       data.push(d)
@@ -151,7 +152,7 @@ Meteor.methods({
           colonyData.forEach(function(colony) {
             count++
             // set random values
-            colony.Hue = Math.floor(Math.random() * 255) 
+            colony.Hue = Math.floor(Math.random() * maxHue) 
           });
 
           // add a record for the experiment to the Experiments collection
@@ -192,7 +193,7 @@ var clearVisualization = function() {
   var data = []
   while (data.length < numBins) {
     var d = {}
-    d.hue = Math.floor((data.length / numBins) * 360)
+    d.hue = Math.floor((data.length / numBins) * maxHue)
     d.count = 0
     d.rarity = 0
     d.changed = false
