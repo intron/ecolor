@@ -57,6 +57,9 @@ Meteor.startup(function() {
   // replicate Experiments collection for debugging purposes
   Meteor.subscribe('experiments')
 
+  // generate hsl string from hue
+  var hueToHsl = function(hue) {return "hsl(" + hue + ",50%,50%)"}
+
   // don't recreate the SVG element
   var svg = d3.select('#wheel').append('svg'),
       plot = svg.append('g')
@@ -68,22 +71,10 @@ Meteor.startup(function() {
     Tracker.autorun(function() {
 
       // reactive with respect to window width and visualization data
-      var padding = 100,
-          width = rwindow.get('$width') - (padding * 2),
-          height = rwindow.get('$height') - (padding * 2),
+      var width = rwindow.get('$width'),
+          height = rwindow.get('$height'),
           data = Visualizations.find({'id': 'bins'}).fetch()[0].data,
           numBins = data.length
-
-
-
-      /////////////////////////////////////////////////
-      //
-      // helpers
-      //
-      ////////////////////////////////////////////////
-
-      var hueToHsl = function(hue) {return "hsl(" + hue + ",50%,50%)"}
-
 
       /////////////////////////////////////////////////
       //
@@ -98,7 +89,7 @@ Meteor.startup(function() {
       plot
         .attr('transform', 'translate(' + width / 2 + ',' + height / 2 + ')')
 
-      var minRadius = 100,
+      var minRadius = 80,
           maxRadius = Math.floor((Math.min(width, height) / 2) - minRadius),
           numTicks = 10
 
