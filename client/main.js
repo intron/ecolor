@@ -8,6 +8,10 @@ Template.test.events({
   'click #clearVisualization': function() {
     Meteor.call('clearVisualization')
   },
+  // clear Experiments records
+  'click #clearExperiments': function() {
+    Meteor.call('clearExperiments')
+  },
   // create a record in Experiments
   'click #generateExperiment': function() {
     Meteor.call('generateExperiment')
@@ -28,24 +32,23 @@ Template.test.events({
 
 // is the visualization collection loaded?
 // TODO use findOne instead?
-var visualizationCollectionReady = false
+var visualizationCollectionReady = function() {return false;}
 
 Template.visualization.helpers({
 
   experimentsCount: function() {
     return function(stats) {
-      if (visualizationCollectionReady)
+      if (visualizationCollectionReady())
         return stats[0].experimentsCount
     }(Visualizations.find({'id': 'stats'}).fetch())
   },
 
   coloniesCount: function() {
     return function(stats) {
-      if (visualizationCollectionReady)
+      if (visualizationCollectionReady())
         return stats[0].coloniesCount
     }(Visualizations.find({'id': 'stats'}).fetch())
   }
-
 })
 
 
@@ -54,15 +57,15 @@ Meteor.startup(function() {
   // replicate Experiments collection for debugging purposes
   Meteor.subscribe('experiments')
 
-  // generate hsl string from hue
-  var hueToHsl = function(hue) {return "hsl(" + hue + ",50%,50%)"}
-
-  // don't recreate the SVG element
-  var svg = d3.select('#wheel').append('svg'),
-      plot = svg.append('g')
-
   // keep track of when collection is ready
   visualizationCollectionReady = Meteor.subscribe('visualizations', function() {
+
+    // generate hsl string from hue
+    var hueToHsl = function(hue) {return "hsl(" + hue + ",50%,50%)"}
+
+    // don't recreate the SVG element
+    var svg = d3.select('#wheel').append('svg'),
+        plot = svg.append('g')
 
     // once collection is ready, generate visuals
     Tracker.autorun(function() {
@@ -182,6 +185,6 @@ Meteor.startup(function() {
 //          .transition().ease('linear').delay(3000)
 
     })
-  })
+  }).ready
 })
 
