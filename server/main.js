@@ -35,19 +35,26 @@ Meteor.startup(function() {
 
     added: function(document) {
       var coloniesAdded = 0,
-          newData = Visualizations.findOne({'id': 'bins'}).data
+          newData = Visualizations.findOne({'id': 'bins'}).data,
+          colorNamesMap = Visualizations.findOne({'id': 'colorCounts'}) || {}
       newData.forEach(function(d) {d.changed = false})
       document.colonyData.forEach(function(colony) {
         coloniesAdded++
         var changedBin = Math.floor((colony.Hue / maxHue * numBins) % numBins)
         newData[changedBin].count++
         newData[changedBin].changed = true
+
+        if (colorNamesMap[colony.ColorName] === undefined)
+          colorNamesMap[colony.ColorName] = 1
+        else
+          colorNamesMap[colony.ColorName]++
       })
       Visualizations.update({'id': 'stats'}, {$inc: {
         coloniesCount: coloniesAdded,
         experimentsCount: 1}
       })
       Visualizations.update({'id': 'bins'}, {$set: {data: newData}})
+      Visualizations.update({'id': 'colorCounts'}, colorNamesMap)
     },
 
     removed: function(document) {
