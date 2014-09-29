@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////
 //
-// test
+// Buttons to call server methods
 //
 ////////////////////////////////////////////////
 Template.test.events({
@@ -22,11 +22,12 @@ Template.test.events({
 
 /////////////////////////////////////////////////
 //
-// hello
+// Reactive values for Visualizations stats
 //
 ////////////////////////////////////////////////
 
 // is the visualization collection loaded?
+// TODO use findOne instead?
 var visualizationCollectionReady = false
 
 Template.visualization.helpers({
@@ -69,7 +70,8 @@ Meteor.startup(function() {
       // reactive with respect to window width and visualization data
       var width = rwindow.get('$width'),
           height = rwindow.get('$height'),
-          data = Visualizations.find({'id': 'bins'}).fetch()[0].data,
+          data = Visualizations.findOne({'id': 'bins'}).data,
+          maxBinCount = Visualizations.findOne({'id': 'stats'}).maxBinCount,
           numBins = data.length
 
       /////////////////////////////////////////////////
@@ -108,14 +110,14 @@ Meteor.startup(function() {
             // set minimum radial amplitude for slices
             var startRadius = minRadius + 10
             var range = (maxRadius - startRadius)
-            return (startRadius + (range * d.data.rarity))
+            return (startRadius + (range * d.data.count / maxBinCount))
           })
           .innerRadius(minRadius)
 
       // area of slice proportional to count
       var pie = d3.layout.pie()
           .sort(null)
-          .value(function(d) { return d.count })
+          .value(function(d) { return 1 })
 
       // draw slices
       var slice = plot.selectAll('path')
