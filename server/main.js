@@ -1,6 +1,6 @@
 var fs = Npm.require("fs")
 
-var numBins = 360,
+var numBins = 60,
     maxHue = 360
 
 Meteor.startup(function() {
@@ -59,16 +59,19 @@ Meteor.startup(function() {
 
     removed: function(document) {
       var coloniesRemoved = 0,
-          newData = Visualizations.findOne({'id': 'bins'}).data
+          newData = Visualizations.findOne({'id': 'bins'}).data,
+          colorNamesMap = Visualizations.findOne({'id': 'colorCounts'}) || {}
       document.colonyData.forEach(function(colony) {
         coloniesRemoved++
         newData[Math.floor((colony.Hue / maxHue * numBins) % numBins)].count--
+        colorNamesMap[colony.ColorName]--
       })
       Visualizations.update({'id': 'stats'}, {$inc: {
         coloniesCount: -coloniesRemoved,
         experimentsCount: -1}
       })
       Visualizations.update({'id': 'bins'}, {$set: {data: newData}})
+      Visualizations.update({'id': 'colorCounts'}, colorNamesMap)
     }
   })
 
@@ -181,6 +184,7 @@ var clearVisualization = function() {
       maxBinCount: 0
     }
   })
+  Visualizations.upsert({'id': 'colorCounts'}, {$set: {}})
 }
 
 // find maximum count across all bins
