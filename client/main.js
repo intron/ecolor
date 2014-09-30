@@ -74,8 +74,8 @@ Meteor.startup(function() {
       var width = rwindow.get('$width'),
           height = rwindow.get('$height'),
           data = Visualizations.findOne({'id': 'bins'}).data,
-          maxBinCount = Visualizations.findOne({'id': 'stats'}).maxBinCount,
-          numBins = data.length
+          numBins = data.length,
+          maxBinCount = Visualizations.findOne({'id': 'stats'}).maxBinCount
 
       /////////////////////////////////////////////////
       //
