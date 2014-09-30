@@ -71,8 +71,8 @@ Meteor.startup(function() {
     Tracker.autorun(function() {
 
       // reactive with respect to window width and visualization data
-      var width = rwindow.get('$width'),
-          height = rwindow.get('$height'),
+      var width = rwindow.get('$width') - 25,
+          height = rwindow.get('$height') - 25,
           data = Visualizations.findOne({'id': 'bins'}).data,
           numBins = data.length,
           maxBinCount = Visualizations.findOne({'id': 'stats'}).maxBinCount
