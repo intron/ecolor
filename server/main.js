@@ -13,6 +13,7 @@ Meteor.startup(function() {
   ////////////////////////////////////////////////
 
   clearVisualization()
+  updateMaxBinCount()
 
   // publish Experiments colletion for debugging purposes
   Meteor.publish('experiments', function() {
@@ -167,7 +168,8 @@ var clearVisualization = function() {
     var d = {}
     d.hue = Math.round(data.length / (numBins - 1) * maxHue)
     d.count = 0
-    d.rarity = 0
+    // no longer using rarity
+    //d.rarity = 0
     d.changed = false
     data.push(d)
   }
