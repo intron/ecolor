@@ -28,19 +28,3 @@ body {
     stroke: white;}
   90% {stroke-width: 0;}
 }
-
-
-
-/*
-#circles {
-  text-align: center;
-}
-
-#circles div {
-  display: inline-block;
-  border-radius: 50%; 
-  position: relative;
-  top: 50%;
-  transform: translateY(50%);
-}
-*/

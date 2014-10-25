@@ -5,6 +5,7 @@ var numBins = 60,
 
 Meteor.startup(function() {
 
+  clearVisualization()
 
   /////////////////////////////////////////////////
   //
@@ -12,8 +13,6 @@ Meteor.startup(function() {
   //
   ////////////////////////////////////////////////
 
-  clearVisualization()
-  updateMaxBinCount()
 
   // publish Experiments colletion for debugging purposes
   Meteor.publish('experiments', function() {
@@ -37,7 +36,7 @@ Meteor.startup(function() {
     added: function(document) {
       var coloniesAdded = 0,
           newData = Visualizations.findOne({'id': 'bins'}).data,
-          colorNamesMap = Visualizations.findOne({'id': 'colorCounts'}) || {}
+          colorNamesMap = Visualizations.findOne({'id': 'colorCounts'}) || {} // used in rainbowreader
       newData.forEach(function(d) {d.changed = false})
       document.colonyData.forEach(function(colony) {
         coloniesAdded++
@@ -90,6 +89,8 @@ Meteor.startup(function() {
       updateMaxBinCount()       
     } 
   })
+
+  updateMaxBinCount()
 
 })
 
@@ -171,8 +172,6 @@ var clearVisualization = function() {
     var d = {}
     d.hue = Math.round(data.length / (numBins - 1) * maxHue)
     d.count = 0
-    // no longer using rarity
-    //d.rarity = 0
     d.changed = false
     data.push(d)
   }
@@ -191,12 +190,12 @@ var clearVisualization = function() {
 
 // find maximum count across all bins
 var updateMaxBinCount = function() {
-    var data = Visualizations.findOne({'id': 'bins'}).data,
-        maxBinCount = 0
-    data.forEach(function(d) {
-      if (d.count > maxBinCount) maxBinCount = d.count
-    })
-    Visualizations.update({'id': 'stats'}, {$set : {maxBinCount: maxBinCount}})
+  var data = Visualizations.findOne({'id': 'bins'}).data,
+      maxBinCount = 0
+  data.forEach(function(d) {
+    if (d.count > maxBinCount) maxBinCount = d.count
+  })
+  Visualizations.update({'id': 'stats'}, {$set : {maxBinCount: maxBinCount}})
 }
 
 // no longer being used in the visualization

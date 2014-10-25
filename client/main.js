@@ -1,5 +1,24 @@
 /////////////////////////////////////////////////
 //
+// Collapse dev-console when title is clicked
+//
+////////////////////////////////////////////////
+Template.title.events({
+  'click #title-box': function (e) {
+    var $dc = $('#dev-console')
+    if ($dc.hasClass('collapsed')) {
+      $dc.removeClass('collapsed')
+      $dc.slideDown() 
+    }
+    else {
+      $dc.addClass('collapsed')
+      $dc.slideUp() 
+    }
+  }
+})
+
+/////////////////////////////////////////////////
+//
 // Buttons to call server methods
 //
 ////////////////////////////////////////////////
@@ -23,18 +42,10 @@ Template.test.events({
   }
 })
 
-
-/////////////////////////////////////////////////
-//
-// Reactive values for Visualizations stats
-//
-////////////////////////////////////////////////
-
 // is the visualization collection loaded?
-// TODO use findOne instead?
 var visualizationCollectionReady = function() {return false;}
 
-Template.visualization.helpers({
+Template.test.helpers({
 
   experimentsCount: function() {
     return function(stats) {
@@ -79,7 +90,7 @@ Meteor.startup(function() {
 
       /////////////////////////////////////////////////
       //
-      // wheel
+      // Color Wheel Visualization
       //
       ////////////////////////////////////////////////
 
@@ -117,7 +128,7 @@ Meteor.startup(function() {
           })
           .innerRadius(minRadius)
 
-      // area of slice proportional to count
+      // area of slice identical for all slices
       var pie = d3.layout.pie()
           .sort(null)
           .value(function(d) { return 1 })
@@ -146,44 +157,6 @@ Meteor.startup(function() {
         slice
             .classed('pulse', function(d) {return d.data.changed})
       }, 100)
-      
-
-
-
-//      /////////////////////////////////////////////////
-//      //
-//      // helpers
-//      //
-//      ////////////////////////////////////////////////
-//
-//      var hueToHsl = function(hue) {return "hsl(" + hue + ",50%,50%)"}
-//
-//
-//      /////////////////////////////////////////////////
-//      //
-//      // circles
-//      //
-//      ////////////////////////////////////////////////
-//
-//      // radius of circles proportional to (count)^(0.5)
-//      // determine total width of the visualization vs page width
-//      var scalingFactor = width / data.map(function(x) {return Math.sqrt(x.count)}).reduce(function(a, b) {return a + b})
-//
-//      // draw circles
-//      var circle = d3.select('#circles').selectAll('div')
-//          .data(data)
-//      plot.selectAll('div')
-//          .classed('pulse', false)
-//      circle.exit().remove()
-//      circle.enter().append('div')
-//          .style('background-color', function(d) {return hueToHsl(d.hue)})
-//      // updated circles should attract attention
-//      circle
-//          .transition().ease('elastic', 8, 0.1)
-//          .style('width', function(d) { return Math.floor(Math.sqrt(d.count) * scalingFactor) + 'px' })
-//          .style('height', function(d) { return Math.floor(Math.sqrt(d.count) * scalingFactor) + 'px' })
-//          .transition().ease('linear').delay(3000)
-
     })
   }).ready
 })
