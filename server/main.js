@@ -1,6 +1,6 @@
 var fs = Npm.require("fs")
 
-var numBins = 60,
+var numBins = 200,
     maxHue = 360
 
 Meteor.startup(function() {

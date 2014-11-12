@@ -31,10 +31,9 @@ Template.test.events({
 ////////////////////////////////////////////////
 
 // is the visualization collection loaded?
-// TODO use findOne instead?
 var visualizationCollectionReady = function() {return false;}
 
-Template.visualization.helpers({
+Template.test.helpers({
 
   experimentsCount: function() {
     return function(stats) {
