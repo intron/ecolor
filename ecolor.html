@@ -3,19 +3,26 @@
 </head>
 
 <body>
+  {{> title}}
   {{> test}}
   {{> visualization}}
 </body>
 
+<template name="title">
+  <div id="title-box">
+    <h1>how many bacteria of each color we've seen</h1>
+  </div>
+</template>
+
 <template name="test">
-  <div id="admin">
+  <div id="dev-console">
     <button id="clearVisualization">Clear Visualization</button>
     <button id="clearExperiments">Clear Experiments</button>
     <button id="generateExperiment">Generate Experiment</button>
     <button id="removeExperiment">Remove Experiment</button>
     <input id="plateBarcodeToRemove" type="text" placeholder="plateBarcode to remove" size=30>
-    <h1>{{experimentsCount}} experiments performed</h1>
-    <h1>{{coloniesCount}} colonies detected</h1>
+    <h2>{{experimentsCount}} total experiments performed</h2>
+    <h2>{{coloniesCount}} total colonies detected</h2>
   </div>
 </template>
 
