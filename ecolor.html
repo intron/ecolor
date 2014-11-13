@@ -16,9 +16,15 @@
 
 <template name="test">
   <div id="dev-console">
+<!--
+    These buttons correspond to methods in client/main.js
+    however it should not be possible to accidentally call
+    these methods in production, so the buttons have been removed
+
     <button id="clearVisualization">Clear Visualization</button>
     <button id="clearExperiments">Clear Experiments</button>
     <button id="generateExperiment">Generate Experiment</button>
+-->
     <button id="removeExperiment">Remove Experiment</button>
     <input id="plateBarcodeToRemove" type="text" placeholder="plateBarcode to remove" size=30>
     <h2>{{experimentsCount}} total experiments performed</h2>

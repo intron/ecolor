@@ -23,6 +23,10 @@ Template.title.events({
 //
 ////////////////////////////////////////////////
 Template.test.events({
+/*
+ * These buttons can be enabled for debugging purposes
+ * but really serve no purpose in normal operation
+ *
   // clear Visualizations records
   'click #clearVisualization': function() {
     Meteor.call('clearVisualization')
@@ -35,7 +39,8 @@ Template.test.events({
   'click #generateExperiment': function() {
     Meteor.call('generateExperiment')
   },
-  // create a record in Experiments
+*/
+  // remove a specific record in Experiments
   'click #removeExperiment': function() {
     var plateBarcode = $('#plateBarcodeToRemove').val()
     Meteor.call('removeExperiment', plateBarcode)
