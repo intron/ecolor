@@ -6,9 +6,8 @@ ecolor makes heavy use of [d3](http://www.d3js.org), a popular data visualizatio
 
 #about the visualization
 
-A polar chart was chosen to use the notion of a bar chart, but acknowledge that the ordering of the colors was arbitrary and there is no particular reason why one color bin would be at the beginning of the chart and one color bin at the end.
+A polar chart was chosen to use the notion of a bar chart, but acknowledge that the ordering of the colors was arbitrary and there is no particular reason why one color bin would be at the beginning of the chart and one color bin at the end. Each bin's radius is proportional to the number of colonies in that bin.
 
-The amount of colonies in the bin is made proportional to the area of the bin, and not the radius. This is so we don’t over-represent differences between bins, since the viewer takes in area (a radius-squared quantity) as opposed to length (a radius quantity.)
 
 
 #about the exhibit
