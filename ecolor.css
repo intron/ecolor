@@ -26,7 +26,21 @@ body {
   -webkit-animation-timing-function: ease-in-out;
 }
 
+/* Chrome syntax */
 @-webkit-keyframes pulse_animation {
+  20% {stroke-width: 0;}
+  45% {
+    stroke-width: 1;
+    stroke: white;}
+  60% {stroke-width: 0;}
+  75% {
+    stroke-width: 1;
+    stroke: white;}
+  90% {stroke-width: 0;}
+}
+
+/* Standard syntax */
+@keyframes pulse_animation {
   20% {stroke-width: 0;}
   45% {
     stroke-width: 1;
