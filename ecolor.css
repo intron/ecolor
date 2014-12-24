@@ -19,35 +19,82 @@ body {
 }
 
 .pulse {
+  animation-name: 'pulse_animation';
+  animation-duration: 3000ms;
+  animation-delay: 8s;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
   -webkit-animation-name: 'pulse_animation';
   -webkit-animation-duration: 3000ms;
   -webkit-animation-delay: 8s;
   -webkit-animation-iteration-count: infinite;
   -webkit-animation-timing-function: ease-in-out;
-}
-
-/* Chrome syntax */
-@-webkit-keyframes pulse_animation {
-  20% {stroke-width: 0;}
-  45% {
-    stroke-width: 1;
-    stroke: white;}
-  60% {stroke-width: 0;}
-  75% {
-    stroke-width: 1;
-    stroke: white;}
-  90% {stroke-width: 0;}
+  -moz-animation-name: 'pulse_animation';
+  -moz-animation-duration: 3000ms;
+  -moz-animation-delay: 8s;
+  -moz-animation-iteration-count: infinite;
+  -moz-animation-timing-function: ease-in-out;
 }
 
 /* Standard syntax */
 @keyframes pulse_animation {
-  20% {stroke-width: 0;}
+  20% {
+    stroke-width: 0;
+  }
   45% {
     stroke-width: 1;
-    stroke: white;}
-  60% {stroke-width: 0;}
+    stroke: white;
+  }
+  60% {
+    stroke-width: 0;
+  }
   75% {
     stroke-width: 1;
-    stroke: white;}
-  90% {stroke-width: 0;}
+    stroke: white;
+  }
+  90% {
+    stroke-width: 0;
+  }
+}
+
+/* Chrome syntax */
+@-webkit-keyframes pulse_animation {
+  20% {
+    stroke-width: 0;
+  }
+  45% {
+    stroke-width: 1;
+    stroke: white;
+  }
+  60% {
+    stroke-width: 0;
+  }
+  75% {
+    stroke-width: 1;
+    stroke: white;
+  }
+  90% {
+    stroke-width: 0;
+  }
+}
+
+/* Mozilla syntax */
+@-moz-keyframes pulse_animation {
+  20% {
+    stroke-width: 0;
+  }
+  45% {
+    stroke-width: 1;
+    stroke: white;
+  }
+  60% {
+    stroke-width: 0;
+  }
+  75% {
+    stroke-width: 1;
+    stroke: white;
+  }
+  90% {
+    stroke-width: 0;
+  }
 }
