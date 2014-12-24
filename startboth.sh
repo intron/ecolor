@@ -1,4 +1,3 @@
-#! /usr/bin/sh
 #local ip address: 10.4.98.52
 
 export MONGO_URL="mongodb://127.0.0.1:3001/meteor"
