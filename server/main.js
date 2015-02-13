@@ -1,6 +1,6 @@
 var fs = Npm.require("fs")
 
-var numBins = 200,
+var numBins = 150,
     maxHue = 360
 
 Meteor.startup(function() {
@@ -28,7 +28,7 @@ Meteor.startup(function() {
   // Experiments observer
   //
   ////////////////////////////////////////////////
-  
+
   // watch Experiments collection for added and removed experiment records
   // update Visualizations collection accordingly
   Experiments.find().observe({
@@ -86,8 +86,8 @@ Meteor.startup(function() {
   // recalculate rarity and maxBinCount
   Visualizations.find({'id': 'stats'}).observe({
     changed: function() {
-      updateMaxBinCount()       
-    } 
+      updateMaxBinCount()
+    }
   })
 
   updateMaxBinCount()
@@ -129,7 +129,7 @@ Meteor.methods({
           colonyData.forEach(function(colony) {
             count++
             // set random values
-            colony.Hue = Math.round(Math.random() * maxHue) 
+            colony.Hue = Math.round(Math.random() * maxHue)
           });
           // add a record for the experiment to the Experiments collection
           Experiments.insert({
@@ -142,7 +142,7 @@ Meteor.methods({
       ))
     }
   }(),
-  
+
   // remove experiment record with specified plateBarcode
   removeExperiment: function(plateBarcode) {
     Experiments.remove({'plateBarcode': plateBarcode}, function(err, res) {
